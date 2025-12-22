@@ -1,56 +1,33 @@
-name: "Publish Container Image"
+name: Build Go linux_amd64 and Win64
+
 on:
-  push:
-  workflow_dispatch: # 添加手动触发
+    workflow_dispatch:
+
+
 jobs:
-  build-and-push:
+
+  build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write # 必须授权以推送镜像
-    env:
-      REPO_NAME: ${{ github.repository }}
-      DOCKERHUB_USERNAME: aothen
-      IMAGE_NAME: go-ip2region
     steps:
-      - name: 检出代码
-        uses: actions/checkout@v4
+    - uses: actions/checkout@main
 
-      - name: 设置小写镜像名称和版本
-        run: |
-          LOWER_NAME=$(echo "$REPO_NAME" | tr '[:upper:]' '[:lower:]')
-          echo "LOWER_NAME=$LOWER_NAME" >> $GITHUB_ENV
-          VERSION=${GITHUB_REF#refs/tags/v}
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
+    - name: Set up Go
+      uses: actions/setup-go@main
+      with:
+        go-version: '1.18'
 
-      - name: 登录到 GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
 
-      # - name: 登录到 Docker Hub
-      #   uses: docker/login-action@v2
-      #   with:
-      #     username: ${{ secrets.DOCKERHUB_USERNAME }}
-      #     password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: 设置 QEMU 支持多架构
-        uses: docker/setup-qemu-action@v3
-
-      - name: 设置 Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: 构建并推送 Docker 镜像
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          platforms: linux/amd64 # 指定架构：x86_64 和 ARM64
-          push: true
-          tags: |
-            ghcr.io/${{ env.LOWER_NAME }}:latest
-
-        # ghcr.io/${{ env.LOWER_NAME }}:${{ env.VERSION }}
-        # ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
-        # ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
+    - name: Build go-ip2region
+      working-directory: .
+      run: |
+          GOOS=linux GOARCH=amd64 go build -trimpath -ldflags="-w -s" -v
+          GOOS=windows GOARCH=amd64 go build -trimpath -ldflags="-w -s" -v
+          tree .
+        
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@main
+      with:
+        name: go-ip2region
+        path: |
+            go-ip2region
+            go-ip2region.exe
