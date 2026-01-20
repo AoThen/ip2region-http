@@ -1,5 +1,42 @@
-.idea
-/tmp
+# Binaries
 *.exe
 *.exe~
-ip2region.db
+*.dll
+*.so
+*.dylib
+ip2region-http
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Dependency directories
+vendor/
+
+# Go workspace file
+go.work
+
+# Database files
+# *.xdb
+# data/*.xdb
+
+# IDE specific
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporary files
+tmp/
+temp/
+PROJECT_SUMMARY.md

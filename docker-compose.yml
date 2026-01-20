@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  ip2region-http:
+    build: .
+    image: ip2region-http:latest
+    container_name: ip2region-http
+    ports:
+      - "8080:8080"
+    volumes:
+      # Optional: Mount local data directory for persistence
+      - ./data:/app/data
+    environment:
+      - SERVER_PORT=8080
+      - DB_PATH=/app/data/ip2region_n.xdb
+      - DOWNLOAD_MODE=true
+      # Custom database download URL (optional)
+      # - DB_URL=https://github.com/hel2o/ip2region_update/releases/download/250820/ip2region_n.xdb
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - ip2network
+
+  # Optional: nginx proxy for reverse proxy
+  nginx:
+    image: nginx:alpine
+    container_name: ip2region-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - ip2region-http
+    restart: unless-stopped
+    networks:
+      - ip2network
+    profiles:
+      - nginx
+
+networks:
+  ip2network:
+    driver: bridge
+
+volumes:
+  data:
+    driver: local

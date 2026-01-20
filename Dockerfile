@@ -1,23 +1,37 @@
-FROM golang:alpine AS builder
-
-ENV GO111MODULE=on \
-    CGO_ENABLED=0 \
-    GOOS=linux \
-    GOARCH=amd64
+FROM golang:1.21-alpine AS builder
 
 WORKDIR /app
-COPY . .
 
-#增加缺失的包，移除没用的包
-RUN go mod tidy
-RUN go build -o main main.go
-# 下载最新的数据库
-# RUN wget https://raw.githubusercontent.com/bqf9979/ip2region/master/data/ip2region.db
+COPY go.mod ./
+# No go.sum needed - no external dependencies
 
+COPY xdb ./xdb
+COPY config.go ./config.go
+COPY download.go ./download.go
+COPY main.go ./main.go
 
-FROM alpine:latest
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o ip2region-http .
+
+FROM alpine:3.19
+
+RUN apk --no-cache add ca-certificates
+
 WORKDIR /app
-COPY --from=builder /app/main /app
-COPY --from=builder /app/ip2region.db /app
-EXPOSE 9090
-ENTRYPOINT  ["/app/main"]
+
+COPY --from=builder /app/ip2region-http .
+
+# Create data directory
+RUN mkdir -p /app/data
+
+COPY data/ip2region_n.xdb /app/data/ip2region_n.xdb
+
+ENV SERVER_PORT=8999
+ENV DB_PATH=/app/data/ip2region_n.xdb
+ENV DOWNLOAD_MODE=true
+
+EXPOSE 8999
+
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 \
+    CMD wget -q --spider http://localhost:8999/health || exit 1
+
+CMD ["./ip2region-http"]
