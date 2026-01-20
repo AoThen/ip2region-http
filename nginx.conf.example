@@ -24,7 +24,7 @@ http {
     gzip_types text/plain application/json;
 
     upstream ip2region {
-        server ip2region-http:8080;
+        server ip2region-http:8999;
     }
 
     server {

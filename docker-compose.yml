@@ -6,19 +6,19 @@ services:
     image: ip2region-http:latest
     container_name: ip2region-http
     ports:
-      - "8080:8080"
+      - "8999:8999"
     volumes:
       # Optional: Mount local data directory for persistence
       - ./data:/app/data
     environment:
-      - SERVER_PORT=8080
+      - SERVER_PORT=8999
       - DB_PATH=/app/data/ip2region_n.xdb
       - DOWNLOAD_MODE=true
       # Custom database download URL (optional)
       # - DB_URL=https://github.com/hel2o/ip2region_update/releases/download/250820/ip2region_n.xdb
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/health"]
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8999/health"]
       interval: 30s
       timeout: 10s
       retries: 3

@@ -19,7 +19,7 @@ type Config struct {
 
 func LoadConfig() (*Config, error) {
 	config := &Config{
-		ServerPort:   8080,
+		ServerPort:   8999,
 		DBPath:       "data/ip2region_n.xdb",
 		DownloadMode: true,
 	}

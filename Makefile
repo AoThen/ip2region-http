@@ -11,9 +11,9 @@ run:
 # Test API
 test:
 	@echo "Testing API..."
-	@curl -s http://localhost:8080/health | jq .
+	@curl -s http://localhost:8999/health | jq .
 	@echo ""
-	@curl -s "http://localhost:8080/search?ip=1.2.3.4" | jq .
+	@curl -s "http://localhost:8999/search?ip=1.2.3.4" | jq .
 
 # Clean build artifacts
 clean:
@@ -27,7 +27,7 @@ docker-build:
 
 # Run Docker container
 docker-run:
-	docker run -p 8080:8080 ip2region-http
+	docker run -p 8999:8999 ip2region-http
 
 # Stop Docker container
 docker-stop:

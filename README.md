@@ -35,7 +35,7 @@ SERVER_PORT=9090 ./ip2region-http
 docker build -t ip2region-http .
 
 # 运行容器
-docker run -p 8080:8080 ip2region-http
+docker run -p 8999:8999 ip2region-http
 ```
 
 ### Docker Compose
@@ -70,15 +70,15 @@ GET /search?ip=1.2.3.4&format=full
 
 ```bash
 # 完整JSON响应
-curl "http://localhost:8080/search?ip=1.2.3.4"
+curl "http://localhost:8999/search?ip=1.2.3.4"
 # {"code":0,"msg":"success","data":{"ip":"1.2.3.4","region":"中国|广东省|深圳市|阿里云"}}
 
 # 纯文本响应
-curl "http://localhost:8080/search?ip=1.2.3.4&format=text"
+curl "http://localhost:8999/search?ip=1.2.3.4&format=text"
 # 中国|广东省|深圳市|阿里云
 
 # 拆分字段JSON响应
-curl "http://localhost:8080/search?ip=1.2.3.4&format=fields"
+curl "http://localhost:8999/search?ip=1.2.3.4&format=fields"
 # {"code":0,"msg":"success","data":{"ip":"1.2.3.4","country":"中国","province":"广东省","city":"深圳市","district":"","isp":"阿里云"}}
 ```
 
@@ -89,7 +89,7 @@ GET /health
 ```
 
 ```bash
-curl "http://localhost:8080/health"
+curl "http://localhost:8999/health"
 # {"code":0,"msg":"ok","data":{"status":"healthy","db_loaded":true,"db_path":"/app/data/ip2region_n.xdb","db_size":8388608}}
 ```
 
@@ -97,7 +97,7 @@ curl "http://localhost:8080/health"
 
 | 变量 | 默认值 | 说明 |
 |------|--------|------|
-| `SERVER_PORT` | 8080 | HTTP服务端口 |
+| `SERVER_PORT` | 8999 | HTTP服务端口 |
 | `DB_PATH` | data/ip2region_n.xdb | 数据库文件路径 |
 | `DB_URL` | - | 数据库下载URL（可选） |
 | `DOWNLOAD_MODE` | true | 是否自动下载数据库 |
@@ -132,16 +132,16 @@ services:
     build: .
     container_name: ip2region-http
     ports:
-      - "8080:8080"
+      - "8999:8999"
     volumes:
       - ./data:/app/data
     environment:
-      - SERVER_PORT=8080
+      - SERVER_PORT=8999
       - DB_PATH=/app/data/ip2region_n.xdb
       - DOWNLOAD_MODE=true
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/health"]
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8999/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -157,7 +157,7 @@ services:
     build: .
     container_name: ip2region-http
     ports:
-      - "8080:8080"
+      - "8999:8999"
     networks:
       - ip2network
 
